@@ -13,6 +13,6 @@ func main() {
 	PORT := os.Getenv("PORT")
 	app := gin.Default()
 
-	app.Run(PORT)
+	app.Run(fmt.Sprintf("%v", PORT))
 	fmt.Println("hello from file upload system!")
 }
