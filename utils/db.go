@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"FUS/models"
 	"fmt"
 	"log"
 
@@ -18,6 +19,8 @@ func SetupDB() {
 	if err != nil {
 		log.Fatal("Failed to open database")
 	}
+
+	DB.AutoMigrate(&models.User{})
 
 	fmt.Println("Connected to db successfully")
 }
