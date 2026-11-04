@@ -28,5 +28,13 @@ func GenerateToken(user models.User) (string, error) {
 }
 
 func ValidateToken(tokenStr string) (*Claims, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
 
+	if err != nil || !token.Valid {
+		return nil, err
+	}
+
+	return token.Claims.(*Claims), nil
 }
