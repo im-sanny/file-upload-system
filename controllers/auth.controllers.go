@@ -1,8 +1,51 @@
 package controllers
 
-import "github.com/gin-gonic/gin"
+import (
+	"FUS/models"
+	"FUS/utils"
+	"fmt"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
+)
 
 func HandleLogin(c *gin.Context) {
+	var user models.User
+
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid body"})
+		return
+	}
+
+	if user.Username == "" || user.Password == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "some fields are missing"})
+		return
+	}
+
+	var dbUser models.User
+	if err := utils.DB.Where("username = ?", user.Username).First(dbUser).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("user with %s username not found!", user.Username)})
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(dbUser.Password), []byte(user.Password)); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid password"})
+		return
+	}
+
+	accessToken, _ := utils.GenerateToken(dbUser)
+	c.SetCookie(
+		"accessToken", accessToken,
+		60*60*24*7,
+		"/", "localhost",
+		false, false,
+	)
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":     "logged in successfully",
+		"accessToken": accessToken,
+	})
 
 }
 
