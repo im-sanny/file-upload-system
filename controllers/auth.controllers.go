@@ -50,7 +50,23 @@ func HandleLogin(c *gin.Context) {
 }
 
 func HandleRegister(c *gin.Context) {
+	var user models.User
 
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid body"})
+		return
+	}
+
+	if user.Username == "" || user.Email == "" || user.Password == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "some fields are missing"})
+		return
+	}
+
+	var existingUser models.User
+	err := utils.DB.Where("username = ? or email = ?", user.Username, user.Email).First(existingUser).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "username or email already exists!"})
+	}
 }
 
 func HandleLogout(c *gin.Context) {
