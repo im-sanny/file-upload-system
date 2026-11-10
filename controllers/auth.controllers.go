@@ -67,6 +67,20 @@ func HandleRegister(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "username or email already exists!"})
 	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error hashing password!"})
+		return
+	}
+
+	user.Password = string(hashedPassword)
+	if err := utils.DB.Create(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user!"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, user)
 }
 
 func HandleLogout(c *gin.Context) {
