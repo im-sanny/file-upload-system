@@ -84,7 +84,13 @@ func HandleRegister(c *gin.Context) {
 }
 
 func HandleLogout(c *gin.Context) {
+	c.SetCookie(
+		"accessToken", "",
+		-1, "/", "localhost",
+		false, false,
+	)
 
+	c.JSON(http.StatusOK, gin.H{"error": "Logged out successfully!"})
 }
 
 func GetUser(c *gin.Context) {
