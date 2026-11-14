@@ -94,5 +94,18 @@ func HandleLogout(c *gin.Context) {
 }
 
 func GetUser(c *gin.Context) {
+	userId, exists := c.Get("userId")
 
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Could not get user id"})
+		return
+	}
+
+	var user models.User
+	if err := utils.DB.Find(&user, userId).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not fetch user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }
