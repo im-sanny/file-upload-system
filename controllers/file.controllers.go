@@ -9,6 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const uploadDir = "./uploads"
+
 func UploadFile(c *gin.Context) {
 	userId, exists := c.Get("userId")
 
