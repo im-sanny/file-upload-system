@@ -85,6 +85,14 @@ func ListFiles(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not fetch user"})
 		return
 	}
+
+	var files []models.File
+	if err := utils.DB.Where("user_id = ?", userId).Find(&files).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error fetching files"})
+		return
+	}
+
+	c.JSON(http.StatusOK, files)
 }
 
 func GetFiles(c *gin.Context) {
