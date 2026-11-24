@@ -120,5 +120,38 @@ func GetFiles(c *gin.Context) {
 }
 
 func DeleteFiles(c *gin.Context) {
+	userId, exists := c.Get("userId")
 
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Could not get user id"})
+		return
+	}
+
+	var user models.User
+	if err := utils.DB.Find(&user, userId).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not fetch user"})
+		return
+	}
+
+	filename := filepath.Base(c.Param("filename"))
+	var fileRecord models.File
+	if err := utils.DB.Where("user_if = ? AND filename = ?", user.ID, filename).First(&fileRecord).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "file not found"})
+		return
+	}
+
+	// delete it from my system
+	filepath := filepath.Join(uploadDir, user.Username, filename)
+	if err := os.Remove(filepath); err != nil && !os.IsNotExist(err) {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete file from the disk"})
+		return
+	}
+
+	// delete from db
+	if err := utils.DB.Delete(&fileRecord).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete file from db"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "file deleted successfully"})
 }
