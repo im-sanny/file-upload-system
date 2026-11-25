@@ -15,12 +15,12 @@ func SetupDB() {
 	fmt.Println("Connecting to db...")
 
 	var err error
-	DB, err = gorm.Open(sqlite.Open("db/sqlite"), &gorm.Config{})
+	DB, err = gorm.Open(sqlite.Open("db.sqlite"), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Failed to open database")
 	}
 
-	DB.AutoMigrate(&models.User{})
+	DB.AutoMigrate(&models.User{}, &models.File{})
 
 	fmt.Println("Connected to db successfully")
 }
