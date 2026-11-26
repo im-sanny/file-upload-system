@@ -3,6 +3,7 @@ package main
 import (
 	"FUS/utils"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -10,12 +11,20 @@ import (
 )
 
 func main() {
-	godotenv.Load()
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Println("Error loading .env:", err)
+	}
+
 	PORT := os.Getenv("PORT")
+	fmt.Println("PORT value:", PORT)
+
 	utils.SetupDB()
 
 	app := gin.Default()
 
-	app.Run(fmt.Sprintf("%v", PORT))
+	if err := app.Run(":" + PORT); err != nil {
+		log.Fatal(err)
+	}
 	fmt.Println("hello from file upload system!")
 }
