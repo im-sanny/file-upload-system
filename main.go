@@ -15,14 +15,11 @@ func main() {
 	if err != nil {
 		fmt.Println("Error loading .env:", err)
 	}
-
 	PORT := os.Getenv("PORT")
 	fmt.Println("PORT value:", PORT)
 
 	utils.SetupDB()
-
 	app := gin.Default()
-
 	if err := app.Run(":" + PORT); err != nil {
 		log.Fatal(err)
 	}
